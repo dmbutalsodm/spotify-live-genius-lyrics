@@ -32,18 +32,17 @@ function getFromGenius(query) {
         let index = 0;
         if(!response.hits[index]) {
             website = null;
-            return console.log("I couldn't find the song.");
         }
-        while(isInArray(response.hits[index].result.full_title, exclusionArray)) {
+        while(response.hits[index] && isInArray(response.hits[index].result.full_title, exclusionArray)) {
             index += 1
         }
-        songObject = response.hits[index].result;
-        website = `https://genius.com${songObject.path}`;
+        songObject = response.hits[index] ? response.hits[index].result : null;
+        website = songObject ? `https://genius.com${songObject.path}` : null;
     }).then(() => makeRequest(website)).catch(reason => console.log(reason));
 }
 
 function makeRequest(website) {
-    if(website == null) return;
+    if(website == null) return console.log("I couldn't find the song.");
     request({uri: website}, (e,r,b) => {
         doc = new JSDOM(b).window.document
         console.log(`${doc.querySelector("h1").textContent} by ${doc.querySelector("h2").textContent.trim()}`);
